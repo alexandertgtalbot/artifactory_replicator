@@ -97,8 +97,8 @@ class Repository:
     if self.delete_temp_directory == True:
       try:
         shutil.rmtree(self.temp_directory)
-      except OSError as e:
-        logger.error(e)
+      except OSError as exception:
+        logger.error(str(exception))
 
 
   # Set a reference repository to replicate from.
@@ -207,8 +207,8 @@ class Repository:
   
       self.trigger_missing_artifact_sync()
 
-    except Exception as e:
-      logger.error(e)
+    except Exception as exception:
+      logger.error(str(exception))
 
     finally:
       self.__get_source_repository().delete_temporary_directories()
@@ -311,7 +311,7 @@ if __name__ == '__main__':
     logger.info('Configuration loaded')
 
   except (OSError, IOError) as exception:
-    logger.warn('Abondoning config load')
+    logger.error('Abondoning config load')
 
   else:
     # Repository instances representative of the source and destination repositories.
@@ -336,11 +336,11 @@ if __name__ == '__main__':
       # Pass a source repository reference to the destination instance.
       destination_repository.set_source_repository(source_repository)
     except TypeError as exception:
-        logger.error(exception)
+        logger.error(str(exception))
     else:
       logger.info('Initiating replication')
       try:
         destination_repository.run_replication()
       except Exception as exception:
-        logger.error(exception)
+        logger.error(str(exception))
 
