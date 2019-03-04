@@ -1,0 +1,13 @@
+{
+  "source_username": "source_username",
+  "source_password": "source_password",
+  "source_base_url": "https://artifactory.source.com/artifactory",
+  "source_repository_name": "source-repository",
+  "destination_username": "destination_username",
+  "destination_password": "destination_password",
+  "destination_base_url": "https://artifactory.destination.com/artifactory",
+  "destination_repository_name": "destination-repository",
+  "delete_temp_directory": false,
+  "max_concurrent_threads": 50,
+  "verify_ssl": false
+}
