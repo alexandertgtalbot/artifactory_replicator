@@ -92,11 +92,13 @@ class Repository:
     self.verify_ssl = verify_ssl
 
 
-  # Delete the temporary directory if set to do so.
-  def __del__(self):
+  def delete_temporary_directories(self):
+    # Delete the temporary directory if set to do so.
     if self.delete_temp_directory == True:
-      # todo - add exception handling
-      shutil.rmtree(self.temp_directory)
+      try:
+        shutil.rmtree(self.temp_directory)
+      except OSError as e:
+        logger.error(e)
 
 
   # Set a reference repository to replicate from.
@@ -173,36 +175,44 @@ class Repository:
 
   # Carry out all steps required for replication. This would be triggered by the destination repository instance.
   def run_replication(self):
-    logger.info('Obtaining source/destination file lists')
+    try:
+      logger.info('Obtaining source/destination file lists')
+  
+      # To be used with the for loop below to wait for each thread's
+      # completion (each in turn).
+      threads_list = []
+  
+      logger.debug('Starting thread 1')
+      # This thread will trigger a file listing for the source repository.
+      t = Thread(target=self.__get_source_repository().load_repository_list, args=())
+      threads_list.append(t)
+      t.start()
+  
+      logger.debug('Starting thread 2')
+      # This thread will trigger a file listing for this instance reprasentative
+      # of the destination repository.
+      t = Thread(target=self.load_repository_list, args=())
+      threads_list.append(t)
+      t.start()
+  
+      logger.debug('Waiting for file listings to complete')
+      for t in threads_list:
+        t.join()
+      logger.info('File listings complete')
+  
+      logger.info('Determining missing content')
+      self.__create_missing_files_set()
+      logger.info('source = ' + str(self.__get_source_repository().number_of_files()) + ' files, ' + str(self.__get_source_repository().number_of_folders()) + ' folders.')
+      logger.info('destination = ' + str(self.number_of_files()) + ' files, ' + str(self.number_of_folders()) + ' folders.')
+  
+      self.trigger_missing_artifact_sync()
 
-    # To be used with the for loop below to wait for each thread's
-    # completion (each in turn).
-    threads_list = []
+    except Exception as e:
+      logger.error(e)
 
-    logger.debug('Starting thread 1')
-    # This thread will trigger a file listing for the source repository.
-    t = Thread(target=self.__get_source_repository().load_repository_list, args=())
-    threads_list.append(t)
-    t.start()
-
-    logger.debug('Starting thread 2')
-    # This thread will trigger a file listing for this instance reprasentative
-    # of the destination repository.
-    t = Thread(target=self.load_repository_list, args=())
-    threads_list.append(t)
-    t.start()
-
-    logger.debug('Waiting for file listings to complete')
-    for t in threads_list:
-      t.join()
-    logger.info('File listings complete')
-
-    logger.info('Determining missing content')
-    self.__create_missing_files_set()
-    logger.info('source = ' + str(self.__get_source_repository().number_of_files()) + ' files, ' + str(self.__get_source_repository().number_of_folders()) + ' folders.')
-    logger.info('destination = ' + str(self.number_of_files()) + ' files, ' + str(self.number_of_folders()) + ' folders.')
-
-    self.trigger_missing_artifact_sync()
+    finally:
+      self.__get_source_repository().delete_temporary_directories()
+      self.delete_temporary_directories()
 
   def files_and_folders(self):
     return self.repo_data['files']
