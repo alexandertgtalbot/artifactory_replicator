@@ -38,8 +38,8 @@ chmod 0600 /home/some_user/.artifactory_replicator/config.json
 5. Run the script (preferably in a screen session) as follows:
 ```
 /some_directory/artifactory_replicator.py
-```
-OR
-```
+
+# OR
+
 screen /some_directory/artifactory_replicator.py
 ```
