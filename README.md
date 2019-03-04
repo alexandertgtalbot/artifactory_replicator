@@ -43,3 +43,10 @@ chmod 0600 /home/some_user/.artifactory_replicator/config.json
 
 screen /some_directory/artifactory_replicator.py
 ```
+
+## Todo (current limitiations):
+1. Add support for multi repository replication (currently only single
+   repository replication is implemented).
+2. Add command line arguments as optional configuration overrides.
+3. Add log rotation.
+4. Collect and export performance metrics.
