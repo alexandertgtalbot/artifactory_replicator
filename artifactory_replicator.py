@@ -155,7 +155,7 @@ class Repository:
 
 
   # Load JSON from file if provided or download if absent.
-  def load_repository_list(self, thread_id = None):
+  def load_repository_list(self):
     if self.repository_list_temp_file == None:
       self.__download_repository_list()
     else:
