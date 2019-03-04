@@ -291,11 +291,22 @@ if __name__ == '__main__':
   # Load configs
   config_path = '.artifactory_replicator/config.json'
   config_manager = None
-  logger.info('Loading configuration ' + config_path)
 
   try:
-    defaults = {}
-    required = [ 'source_username' ]
+    defaults = { 'delete_temp_directory': 'false',
+                 'max_concurrent_threads': 10,
+                 'verify_ssl': True }
+
+    required = [ 'source_username',
+                 'source_password',
+                 'source_base_url',
+                 'source_repository_name',
+                 'destination_username',
+                 'destination_password',
+                 'destination_base_url',
+                 'destination_repository_name' ]
+
+    logger.info('Loading configuration ' + config_path)
     config_manager = ConfigManager(config_file_path = config_path, defaults = defaults, required = required)
     logger.info('Configuration loaded')
 
