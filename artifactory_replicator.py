@@ -29,7 +29,10 @@ from Queue import Queue
 import os
 import sys
 import logging
+
 from config_manager import ConfigManager
+
+import argparse
 
 class Repository:
   def __init__( self,
@@ -288,10 +291,57 @@ if __name__ == '__main__':
   logger.addHandler(ch)
 
 
-  # Load configs
-  config_path = '.artifactory_replicator/config.json'
-  config_manager = None
+  # Load arguments
+  parser = argparse.ArgumentParser(description='Run Artifactory repository replication.')
 
+  parser.add_argument('--config',
+                     default='/etc/artifactory_replicator/config.json',
+                     help='The configuration file to load')
+
+  parser.add_argument('--source-username',
+                     help='The username to use to replicate from the source repository')
+  parser.add_argument('--source-password',
+                     help='The password to use to replicate from the source repository')
+  parser.add_argument('--source-base-url',
+                     help='''The base URL to use to replicate from the source
+                             repository, e.g.
+                             https://artifactory.source.com/artifactory''')
+  parser.add_argument('--source-repository-name',
+                     help='The source repository name')
+
+  parser.add_argument('--destination-username',
+                     help='The username to use to replicate to the destination repository')
+  parser.add_argument('--destination-password',
+                     help='The password to use to replicate to the destination repository')
+  parser.add_argument('--destination-base-url',
+                     help='''The base URL to use to replicate to the destination
+                             repository, e.g.
+                             https://artifactory.destination.com/artifactory''')
+  parser.add_argument('--destination-repository-name',
+                     help='The destination repository name')
+
+
+  parser.add_argument('--keep-temp-directory',
+                     default=False,
+                     action='store_true',
+                     help='Keep temporary directories (default: False)')
+  parser.add_argument('--max-concurrent-threads',
+                     default=10,
+                     type=int,
+                     help=''''The number of concurrent threads for replication of
+                             a single repository (default: 10)''')
+  parser.add_argument('--no-verify-ssl',
+                     default=False,
+                     action='store_true',
+                     help='Disable SSL verification (default: False)')
+
+  parser.add_argument('--version', action='version', version='%(prog)s 0.2.0')
+
+  args = parser.parse_args()
+
+
+  # Load configs
+  config_manager = None
   try:
     defaults = { 'delete_temp_directory': 'false',
                  'max_concurrent_threads': 10,
@@ -306,8 +356,8 @@ if __name__ == '__main__':
                  'destination_base_url',
                  'destination_repository_name' ]
 
-    logger.info('Loading configuration ' + config_path)
-    config_manager = ConfigManager(config_file_path = config_path, defaults = defaults, required = required)
+    logger.info('Loading configuration ' + args.config)
+    config_manager = ConfigManager(config_file_path = args.config, defaults = defaults, required = required)
     logger.info('Configuration loaded')
 
   except (OSError, IOError) as exception:
