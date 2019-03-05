@@ -236,7 +236,7 @@ class Repository:
       sync_queue.put((i, self.missing_files_set[i]))
 
     for i in range(concurrent_threads):
-      logger.debug('Starting thread ', str(i))
+      logger.debug('Starting thread ' + str(i))
       worker = Thread(target=self.__sync_artifact, args=(i,sync_queue,results))
       worker.setDaemon(True)
       worker.start()
